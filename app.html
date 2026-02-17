@@ -1,21 +1,16 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Borsa Analiz v4.0</title>
     
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -33,138 +28,102 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
         
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #333; font-size: 24px; margin-bottom: 5px; }
+        .header p { color: #666; font-size: 14px; }
         
-        .header h1 {
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        
-        .header p {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .login-section {
-            text-align: center;
-            padding: 40px 20px;
-        }
+        .login-section { text-align: center; padding: 40px 20px; }
         
         .login-btn {
             background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            color: white; border: none; padding: 15px 40px;
+            font-size: 16px; font-weight: bold; border-radius: 10px;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         
         .section {
-            margin-bottom: 30px;
-            padding: 15px;
-            border-radius: 10px;
-            background: #f8f9fa;
+            margin-bottom: 25px; padding: 15px;
+            border-radius: 10px; background: #f8f9fa;
         }
         
         .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 18px; font-weight: bold;
+            margin-bottom: 15px; color: #333;
         }
         
         .tarama-card {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border-left: 4px solid #2E7D32;
+            background: white; padding: 15px; margin-bottom: 10px;
+            border-radius: 8px; border-left: 4px solid #2E7D32;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
-        .tarama-hisse {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1B5E20;
-            margin-bottom: 5px;
-        }
-        
-        .tarama-detail {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 3px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
+        .tarama-hisse { font-size: 18px; font-weight: bold; color: #1B5E20; margin-bottom: 5px; }
+        .tarama-detail { color: #666; font-size: 14px; margin-bottom: 3px; }
+        .loading { text-align: center; padding: 40px; color: #666; }
         
         .error {
-            background: #ffebee;
-            color: #c62828;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        
-        .success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
+            background: #ffebee; color: #c62828;
+            padding: 15px; border-radius: 8px; margin: 10px 0;
         }
         
         .user-info {
-            background: #e3f2fd;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: #e3f2fd; padding: 10px 15px; border-radius: 8px;
+            margin-bottom: 20px; display: flex;
+            justify-content: space-between; align-items: center;
         }
         
         .logout-btn {
-            background: #d32f2f;
-            color: white;
-            border: none;
-            padding: 8px 16px;
+            background: #d32f2f; color: white; border: none;
+            padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 14px;
+        }
+        
+        .search-row {
+            display: flex; gap: 10px; margin-bottom: 15px;
+        }
+        
+        .search-input {
+            flex: 1; padding: 12px; font-size: 16px;
+            border: 2px solid #ddd; border-radius: 8px;
+            text-transform: uppercase;
+        }
+        
+        .search-btn {
+            background: #1B5E20; color: white; border: none;
+            padding: 12px 20px; border-radius: 8px;
+            cursor: pointer; font-size: 16px; font-weight: bold;
+        }
+        
+        .tabs {
+            display: flex; gap: 5px; margin-bottom: 15px;
+        }
+        
+        .tab-btn {
+            flex: 1; padding: 10px; border: 2px solid #ddd;
+            background: white; border-radius: 8px; cursor: pointer;
+            font-size: 13px; font-weight: bold; color: #666;
+        }
+        
+        .tab-btn.active {
+            background: #1B5E20; color: white; border-color: #1B5E20;
+        }
+        
+        .kurum-card {
+            background: white; padding: 12px; margin-bottom: 8px;
+            border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        
+        .kurum-adi { font-weight: bold; color: #333; font-size: 15px; }
+        
+        .kurum-lot {
+            font-size: 16px; font-weight: bold; padding: 4px 10px;
             border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
         }
         
-        select {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            background: white;
-        }
+        .pozitif { background: #e8f5e9; color: #2e7d32; }
+        .negatif { background: #ffebee; color: #c62828; }
         
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -175,65 +134,67 @@
                 <h1>🔥 Borsa Analiz v4.0</h1>
                 <p>Firebase Cloud Database</p>
             </div>
-            
             <div class="login-section">
                 <h2>Hoş Geldiniz</h2>
-                <p style="margin: 20px 0; color: #666;">Devam etmek için Google hesabınızla giriş yapın</p>
-                <button class="login-btn" onclick="googleLogin()">
-                    🔐 Google ile Giriş Yap
-                </button>
+                <p style="margin: 20px 0; color: #666;">Google hesabınızla giriş yapın</p>
+                <button class="login-btn" onclick="googleLogin()">🔐 Google ile Giriş Yap</button>
             </div>
         </div>
         
         <!-- Ana Uygulama -->
         <div id="appSection" class="hidden">
-            <!-- Kullanıcı Bilgisi -->
             <div class="user-info">
                 <span id="userEmail">...</span>
                 <button class="logout-btn" onclick="logout()">Çıkış</button>
             </div>
             
-            <!-- Başlık -->
             <div class="header">
-                <h1>📊 Borsa Analiz</h1>
-                <p>Tarama ve Analiz Sistemi</p>
+                <h1>📊 Borsa Analiz v4.0</h1>
             </div>
             
-            <!-- Günlük Tarama (Üstte Sabit) -->
+            <!-- Günlük Tarama -->
             <div class="section">
-                <div class="section-title">
-                    🔥 GÜNLÜK TARAMA
-                </div>
-                <div id="gunlukTarama">
-                    <div class="loading">Yükleniyor...</div>
-                </div>
+                <div class="section-title">🔥 GÜNLÜK TARAMA</div>
+                <div id="gunlukTarama"><div class="loading">Yükleniyor...</div></div>
             </div>
             
             <!-- Haftalık Tarama -->
             <div class="section">
-                <div class="section-title">
-                    📅 HAFTALIK TARAMA
-                </div>
-                <div id="haftalikTarama">
-                    <div class="loading">Yükleniyor...</div>
-                </div>
+                <div class="section-title">📅 HAFTALIK TARAMA</div>
+                <div id="haftalikTarama"><div class="loading">Yükleniyor...</div></div>
             </div>
             
             <!-- Hisse Analizi -->
             <div class="section">
-                <div class="section-title">
-                    📊 HİSSE ANALİZİ
+                <div class="section-title">📊 HİSSE ANALİZİ</div>
+                
+                <div class="search-row">
+                    <input 
+                        type="text" 
+                        id="hisseInput" 
+                        class="search-input" 
+                        placeholder="HİSSE KOD (ör: THYAO)"
+                        maxlength="10"
+                        oninput="this.value = this.value.toUpperCase()"
+                        onkeypress="if(event.key==='Enter') hisseAnaliz()"
+                    >
+                    <button class="search-btn" onclick="hisseAnaliz()">🔍 Ara</button>
                 </div>
-                <select id="hisseSelect" onchange="hisseAnaliz()">
-                    <option value="">Hisse Seçin...</option>
-                </select>
+                
+                <!-- Sekme seçimi -->
+                <div class="tabs" id="analizTabs" style="display:none">
+                    <button class="tab-btn active" onclick="showTab('takas')" id="tabTakas">📊 TAKAS</button>
+                    <button class="tab-btn" onclick="showTab('akd')" id="tabAkd">💰 AKD</button>
+                </div>
+                
                 <div id="hisseDetay"></div>
+                <div id="takasDetay" style="display:none"></div>
+                <div id="akdDetay" style="display:none"></div>
             </div>
         </div>
     </div>
     
     <script>
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyA1DHpkhs-sRLL_K3yM0IUm7fFnVGdSXpA",
             authDomain: "eraytakastik.firebaseapp.com",
@@ -243,12 +204,10 @@
             appId: "1:357690428225:web:c2e4e410bdce26c0e22fc0"
         };
         
-        // Firebase başlat
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
         
-        // Cihaz ID
         function getCihazID() {
             let cihazID = localStorage.getItem('cihaz_id');
             if (!cihazID) {
@@ -258,19 +217,13 @@
             return cihazID;
         }
         
-        // Google Login
         function googleLogin() {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
-                .then((result) => {
-                    console.log('Giriş başarılı:', result.user.email);
-                })
-                .catch((error) => {
-                    alert('Giriş hatası: ' + error.message);
-                });
+                .then(result => console.log('Giriş:', result.user.email))
+                .catch(error => alert('Giriş hatası: ' + error.message));
         }
         
-        // Logout
         function logout() {
             auth.signOut().then(() => {
                 document.getElementById('loginSection').classList.remove('hidden');
@@ -278,224 +231,202 @@
             });
         }
         
-        // Auth state dinle
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                checkUserAuthorization(user);
-            } else {
+        auth.onAuthStateChanged(user => {
+            if (user) checkUserAuthorization(user);
+            else {
                 document.getElementById('loginSection').classList.remove('hidden');
                 document.getElementById('appSection').classList.add('hidden');
             }
         });
         
-        // Kullanıcı yetki kontrolü
         async function checkUserAuthorization(user) {
             try {
                 const userDoc = await db.collection('kullanicilar').doc(user.email).get();
-                
                 if (!userDoc.exists) {
                     alert('❌ Erişim yetkiniz yok! Lütfen yönetici ile iletişime geçin.');
-                    auth.signOut();
-                    return;
+                    auth.signOut(); return;
                 }
-                
                 const userData = userDoc.data();
-                
                 if (!userData.aktif) {
-                    alert('❌ Hesabınız geçici olarak devre dışı.');
-                    auth.signOut();
-                    return;
+                    alert('❌ Hesabınız devre dışı.');
+                    auth.signOut(); return;
                 }
-                
                 const cihazID = getCihazID();
                 const kayitliCihaz = userData.cihaz_id;
-                
                 if (kayitliCihaz && kayitliCihaz !== cihazID) {
                     alert('❌ Bu hesap başka bir cihazda kullanılıyor.');
-                    auth.signOut();
-                    return;
+                    auth.signOut(); return;
                 }
-                
-                if (!kayitliCihaz) {
-                    await db.collection('kullanicilar').doc(user.email).update({
-                        cihaz_id: cihazID,
-                        son_giris: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } else {
-                    await db.collection('kullanicilar').doc(user.email).update({
-                        son_giris: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-                
+                await db.collection('kullanicilar').doc(user.email).update({
+                    cihaz_id: cihazID,
+                    son_giris: firebase.firestore.FieldValue.serverTimestamp()
+                });
                 showApp(user);
-                
             } catch (error) {
-                console.error('Yetki kontrolü hatası:', error);
                 alert('Bir hata oluştu: ' + error.message);
                 auth.signOut();
             }
         }
         
-        // Ana uygulama göster
         function showApp(user) {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('appSection').classList.remove('hidden');
             document.getElementById('userEmail').textContent = user.email;
-            
             loadGunlukTarama();
             loadHaftalikTarama();
-            loadHisseler();
         }
         
-        // Günlük tarama yükle
         async function loadGunlukTarama() {
             try {
                 const snapshot = await db.collection('taramalar').doc('gunluk').collection('liste')
-                    .orderBy('tarih', 'desc')
-                    .limit(10)
-                    .get();
-                
+                    .orderBy('tarih', 'desc').limit(10).get();
                 const container = document.getElementById('gunlukTarama');
-                
                 if (snapshot.empty) {
-                    container.innerHTML = '<p style="text-align:center; color:#999;">Günlük tarama yok</p>';
+                    container.innerHTML = '<p style="text-align:center;color:#999;">Günlük tarama yok</p>';
                     return;
                 }
-                
                 let html = '';
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    html += `
-                        <div class="tarama-card">
-                            <div class="tarama-hisse">${data.hisse}</div>
-                            <div class="tarama-detail">Destek: ${data.destek}₺ | Direnç: ${data.direnc}₺</div>
-                            <div class="tarama-detail">Teknik: ${data.teknik}</div>
-                        </div>
-                    `;
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    html += `<div class="tarama-card">
+                        <div class="tarama-hisse">${d.hisse}</div>
+                        <div class="tarama-detail">Destek: ${d.destek}₺ | Direnç: ${d.direnc}₺</div>
+                        <div class="tarama-detail">${d.teknik}</div>
+                    </div>`;
                 });
-                
                 container.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Günlük tarama hatası:', error);
+            } catch (e) {
                 document.getElementById('gunlukTarama').innerHTML = '<div class="error">Yükleme hatası</div>';
             }
         }
         
-        // Haftalık tarama yükle
         async function loadHaftalikTarama() {
             try {
                 const snapshot = await db.collection('taramalar').doc('haftalik').collection('liste')
-                    .orderBy('tarih', 'desc')
-                    .limit(10)
-                    .get();
-                
+                    .orderBy('tarih', 'desc').limit(10).get();
                 const container = document.getElementById('haftalikTarama');
-                
                 if (snapshot.empty) {
-                    container.innerHTML = '<p style="text-align:center; color:#999;">Haftalık tarama yok</p>';
+                    container.innerHTML = '<p style="text-align:center;color:#999;">Haftalık tarama yok</p>';
                     return;
                 }
-                
                 let html = '';
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    html += `
-                        <div class="tarama-card">
-                            <div class="tarama-hisse">${data.hisse}</div>
-                            <div class="tarama-detail">${data.aciklama}</div>
-                        </div>
-                    `;
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    html += `<div class="tarama-card">
+                        <div class="tarama-hisse">${d.hisse}</div>
+                        <div class="tarama-detail">${d.aciklama}</div>
+                    </div>`;
                 });
-                
                 container.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Haftalık tarama hatası:', error);
+            } catch (e) {
                 document.getElementById('haftalikTarama').innerHTML = '<div class="error">Yükleme hatası</div>';
             }
         }
         
-        // Hisse listesi yükle
-        async function loadHisseler() {
-            try {
-                const snapshot = await db.collection('takas_veriler')
-                    .limit(100)
-                    .get();
-                
-                const hisseler = new Set();
-                snapshot.forEach((doc) => {
-                    hisseler.add(doc.data().hisse);
-                });
-                
-                const select = document.getElementById('hisseSelect');
-                select.innerHTML = '<option value="">Hisse Seçin...</option>';
-                
-                Array.from(hisseler).sort().forEach((hisse) => {
-                    const option = document.createElement('option');
-                    option.value = hisse;
-                    option.textContent = hisse;
-                    select.appendChild(option);
-                });
-                
-            } catch (error) {
-                console.error('Hisse listesi hatası:', error);
-            }
+        // Aktif tab
+        let aktifTab = 'takas';
+        
+        function showTab(tab) {
+            aktifTab = tab;
+            document.getElementById('tabTakas').classList.toggle('active', tab === 'takas');
+            document.getElementById('tabAkd').classList.toggle('active', tab === 'akd');
+            document.getElementById('takasDetay').style.display = tab === 'takas' ? 'block' : 'none';
+            document.getElementById('akdDetay').style.display = tab === 'akd' ? 'block' : 'none';
         }
         
-        // Hisse analiz
         async function hisseAnaliz() {
-            const hisse = document.getElementById('hisseSelect').value;
-            const container = document.getElementById('hisseDetay');
-            
+            const hisse = document.getElementById('hisseInput').value.trim().toUpperCase();
             if (!hisse) {
-                container.innerHTML = '';
+                alert('Hisse kodu girin!');
                 return;
             }
             
-            container.innerHTML = '<div class="loading">Yükleniyor...</div>';
+            document.getElementById('hisseDetay').innerHTML = '';
+            document.getElementById('takasDetay').innerHTML = '<div class="loading">Yükleniyor...</div>';
+            document.getElementById('akdDetay').innerHTML = '<div class="loading">Yükleniyor...</div>';
+            document.getElementById('analizTabs').style.display = 'flex';
+            showTab('takas');
             
+            // TAKAS analizi
             try {
-                const takasSnapshot = await db.collection('takas_veriler')
+                const takasSnap = await db.collection('takas_veriler')
                     .where('hisse', '==', hisse)
-                    .orderBy('tarih', 'desc')
-                    .limit(5)
                     .get();
                 
-                const akdSnapshot = await db.collection('akd_veriler')
+                if (takasSnap.empty) {
+                    document.getElementById('takasDetay').innerHTML = 
+                        '<p style="text-align:center;color:#999;padding:20px;">📭 TAKAS verisi yok</p>';
+                } else {
+                    // Kurum bazında topla
+                    const kurumlar = {};
+                    takasSnap.forEach(doc => {
+                        const d = doc.data();
+                        const kurum = d.kurum || 'Bilinmeyen';
+                        if (!kurumlar[kurum]) kurumlar[kurum] = 0;
+                        kurumlar[kurum] += (d.net_lot || 0);
+                    });
+                    
+                    // Sırala
+                    const sorted = Object.entries(kurumlar).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+                    
+                    let html = `<div style="margin-bottom:10px;font-weight:bold;color:#333;">
+                        📊 ${hisse} - TAKAS Aracı Kurum Analizi
+                    </div>`;
+                    
+                    sorted.forEach(([kurum, lot]) => {
+                        const cls = lot >= 0 ? 'pozitif' : 'negatif';
+                        const sign = lot >= 0 ? '+' : '';
+                        html += `<div class="kurum-card">
+                            <span class="kurum-adi">${kurum}</span>
+                            <span class="kurum-lot ${cls}">${sign}${lot.toLocaleString()} LOT</span>
+                        </div>`;
+                    });
+                    
+                    document.getElementById('takasDetay').innerHTML = html;
+                }
+            } catch (e) {
+                document.getElementById('takasDetay').innerHTML = 
+                    '<div class="error">TAKAS verisi yüklenemedi: ' + e.message + '</div>';
+            }
+            
+            // AKD analizi
+            try {
+                const akdSnap = await db.collection('akd_veriler')
                     .where('hisse', '==', hisse)
-                    .orderBy('tarih', 'desc')
-                    .limit(5)
                     .get();
                 
-                let html = '<div style="margin-top: 15px;">';
-                
-                html += '<h4>📊 TAKAS Verileri</h4>';
-                if (!takasSnapshot.empty) {
-                    takasSnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        html += `<div class="tarama-detail">${data.tarih}: ${data.net_lot} LOT (${data.kurum})</div>`;
-                    });
+                if (akdSnap.empty) {
+                    document.getElementById('akdDetay').innerHTML = 
+                        '<p style="text-align:center;color:#999;padding:20px;">📭 AKD verisi yok</p>';
                 } else {
-                    html += '<p style="color:#999;">Veri yok</p>';
-                }
-                
-                html += '<h4 style="margin-top: 15px;">💰 AKD Verileri</h4>';
-                if (!akdSnapshot.empty) {
-                    akdSnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        html += `<div class="tarama-detail">${data.tarih}: ${data.net_lot} LOT (${data.kurum})</div>`;
+                    const kurumlar = {};
+                    akdSnap.forEach(doc => {
+                        const d = doc.data();
+                        const kurum = d.kurum || 'Bilinmeyen';
+                        if (!kurumlar[kurum]) kurumlar[kurum] = 0;
+                        kurumlar[kurum] += (d.net_lot || 0);
                     });
-                } else {
-                    html += '<p style="color:#999;">Veri yok</p>';
+                    
+                    const sorted = Object.entries(kurumlar).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+                    
+                    let html = `<div style="margin-bottom:10px;font-weight:bold;color:#333;">
+                        💰 ${hisse} - AKD Aracı Kurum Analizi
+                    </div>`;
+                    
+                    sorted.forEach(([kurum, lot]) => {
+                        const cls = lot >= 0 ? 'pozitif' : 'negatif';
+                        const sign = lot >= 0 ? '+' : '';
+                        html += `<div class="kurum-card">
+                            <span class="kurum-adi">${kurum}</span>
+                            <span class="kurum-lot ${cls}">${sign}${lot.toLocaleString()} LOT</span>
+                        </div>`;
+                    });
+                    
+                    document.getElementById('akdDetay').innerHTML = html;
                 }
-                
-                html += '</div>';
-                container.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Analiz hatası:', error);
-                container.innerHTML = '<div class="error">Analiz hatası</div>';
+            } catch (e) {
+                document.getElementById('akdDetay').innerHTML = 
+                    '<div class="error">AKD verisi yüklenemedi: ' + e.message + '</div>';
             }
         }
     </script>

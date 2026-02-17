@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borsa Analiz v6.0 ULTRA</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 10px;
+        }
+        .container {
+            max-width: 900px; margin: 0 auto; background: white;
+            border-radius: 15px; padding: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .header { text-align: center; margin-bottom: 10px; }
+        .header h1 { color: #333; font-size: 18px; margin-bottom: 2px; }
+        .header p { color: #666; font-size: 10px; }
+        .login-section { text-align: center; padding: 40px 20px; }
+        .login-btn {
+            background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+            color: white; border: none; padding: 15px 40px; font-size: 16px;
+            font-weight: bold; border-radius: 10px; cursor: pointer;
+        }
+        .section {
+            margin-bottom: 12px; padding: 9px; border-radius: 10px; background: #f8f9fa;
+        }
+        .section-title { font-size: 13px; font-weight: bold; margin-bottom: 7px; color: #333; }
+        .tarama-card {
+            background: white; padding: 8px; margin-bottom: 4px; border-radius: 8px;
+            border-left: 4px solid #2E7D32; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .tarama-hisse { font-size: 13px; font-weight: bold; color: #1B5E20; margin-bottom: 2px; }
+        .tarama-detail { color: #666; font-size: 10px; margin-bottom: 1px; }
+        .loading { text-align: center; padding: 18px; color: #666; font-size: 11px; }
+        .error { background: #ffebee; color: #c62828; padding: 7px; border-radius: 8px; margin: 5px 0; font-size: 10px; }
+        .user-info {
+            background: #e3f2fd; padding: 5px 8px; border-radius: 8px; margin-bottom: 8px;
+            display: flex; justify-content: space-between; align-items: center; font-size: 10px;
+        }
+        .logout-btn {
+            background: #d32f2f; color: white; border: none; padding: 3px 7px;
+            border-radius: 5px; cursor: pointer; font-size: 10px;
+        }
+        .search-row { display: flex; gap: 4px; margin-bottom: 7px; }
+        .search-input {
+            flex: 1; padding: 7px; font-size: 12px; border: 2px solid #ddd;
+            border-radius: 8px; text-transform: uppercase;
+        }
+        .search-btn {
+            background: #1B5E20; color: white; border: none; padding: 7px 11px;
+            border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold;
+        }
+        .date-row { display: flex; gap: 4px; margin-bottom: 7px; }
+        .date-input {
+            flex: 1; padding: 5px; font-size: 10px; border: 2px solid #ddd; border-radius: 8px;
+        }
+        .tabs { display: flex; gap: 2px; margin-bottom: 7px; flex-wrap: wrap; }
+        .tab-btn {
+            flex: 1; min-width: 55px; padding: 5px 3px; border: 2px solid #ddd; background: white;
+            border-radius: 8px; cursor: pointer; font-size: 9px; font-weight: bold; color: #666;
+        }
+        .tab-btn.active { background: #1B5E20; color: white; border-color: #1B5E20; }
+        
+        .analiz-card {
+            background: white; padding: 7px; margin-bottom: 4px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .analiz-baslik { font-weight: bold; font-size: 11px; margin-bottom: 3px; }
+        .analiz-detay { font-size: 10px; color: #666; margin-bottom: 1px; }
+        
+        .kritik-card {
+            background: #ffebee; padding: 7px; margin-bottom: 4px; border-radius: 8px;
+            border-left: 4px solid #d32f2f;
+        }
+        .kritik-baslik { font-weight: bold; color: #b71c1c; font-size: 11px; margin-bottom: 2px; }
+        
+        .uyari-card {
+            background: #fff3e0; padding: 7px; margin-bottom: 4px; border-radius: 8px;
+            border-left: 4px solid #ff9800;
+        }
+        .uyari-baslik { font-weight: bold; color: #e65100; font-size: 11px; margin-bottom: 2px; }
+        
+        .basari-card {
+            background: #e8f5e9; padding: 7px; margin-bottom: 4px; border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+        .basari-baslik { font-weight: bold; color: #1b5e20; font-size: 11px; margin-bottom: 2px; }
+        
+        .virman-card {
+            background: #fce4ec; padding: 7px; margin-bottom: 4px; border-radius: 8px;
+            border-left: 4px solid #c2185b;
+        }
+        .virman-baslik { font-weight: bold; color: #880e4f; font-size: 11px; margin-bottom: 2px; }
+        
+        .toplama-card {
+            background: #e1f5fe; padding: 7px; margin-bottom: 4px; border-radius: 8px;
+            border-left: 4px solid #0277bd;
+        }
+        .toplama-baslik { font-weight: bold; color: #01579b; font-size: 11px; margin-bottom: 2px; }
+        
+        .kurum-lot { font-size: 11px; font-weight: bold; padding: 2px 5px; border-radius: 4px; }
+        .pozitif { background: #e8f5e9; color: #2e7d32; }
+        .negatif { background: #ffebee; color: #c62828; }
+        
+        .ozet-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 7px;
+        }
+        .ozet-item {
+            background: #fff9c4; padding: 5px; border-radius: 6px; border-left: 3px solid #f57f17;
+        }
+        .ozet-label { font-size: 9px; color: #666; }
+        .ozet-value { font-size: 10px; font-weight: bold; color: #333; }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Giriş -->
+        <div id="loginSection">
+            <div class="header">
+                <h1>🔥 Borsa Analiz v6.0 ULTRA</h1>
+                <p>Profesyonel Kurum Analiz Sistemi</p>
+            </div>
+            <div class="login-section">
+                <h2>Hoş Geldiniz</h2>
+                <p style="margin: 20px 0; color: #666;">Google hesabınızla giriş yapın</p>
+                <button class="login-btn" onclick="googleLogin()">🔐 Google ile Giriş Yap</button>
+            </div>
+        </div>
+        
+        <!-- Ana Uygulama -->
+        <div id="appSection" class="hidden">
+            <div class="user-info">
+                <span id="userEmail">...</span>
+                <button class="logout-btn" onclick="logout()">Çıkış</button>
+            </div>
+            
+            <div class="header">
+                <h1>📊 Borsa Analiz v6.0 ULTRA</h1>
+                <p>Virman · LOT Eşleşme · Düzenli Toplama</p>
+            </div>
+            
+            <!-- Günlük/Haftalık Tarama (collapsed) -->
+            <details class="section">
+                <summary class="section-title" style="cursor:pointer;">🔥 GÜNLÜK TARAMA</summary>
+                <div id="gunlukTarama"><div class="loading">Yükleniyor...</div></div>
+            </details>
+            
+            <details class="section">
+                <summary class="section-title" style="cursor:pointer;">📅 HAFTALIK TARAMA</summary>
+                <div id="haftalikTarama"><div class="loading">Yükleniyor...</div></div>
+            </details>
+            
+            <!-- Hisse Analizi -->
+            <div class="section">
+                <div class="section-title">📊 PROFESYONEL HİSSE ANALİZİ</div>
+                
+                <div class="search-row">
+                    <input 
+                        type="text" 
+                        id="hisseInput" 
+                        class="search-input" 
+                        placeholder="HİSSE KOD"
+                        maxlength="10"
+                        oninput="this.value = this.value.toUpperCase()"
+                        onkeypress="if(event.key==='Enter') hisseAnaliz()"
+                    >
+                    <button class="search-btn" onclick="hisseAnaliz()">🔍</button>
+                </div>
+                
+                <div class="date-row">
+                    <input type="date" id="baslangicTarih" class="date-input">
+                    <input type="date" id="bitisTarih" class="date-input">
+                </div>
+                
+                <!-- Özet -->
+                <div id="analizOzet"></div>
+                
+                <!-- Sekmeler -->
+                <div class="tabs" id="analizTabs" style="display:none">
+                    <button class="tab-btn active" onclick="showTab('ozet')" id="tabOzet">📋</button>
+                    <button class="tab-btn" onclick="showTab('virman')" id="tabVirman">🔄</button>
+                    <button class="tab-btn" onclick="showTab('esleme')" id="tabEsleme">🔗</button>
+                    <button class="tab-btn" onclick="showTab('toplama')" id="tabToplama">📈</button>
+                    <button class="tab-btn" onclick="showTab('takas')" id="tabTakas">📊</button>
+                    <button class="tab-btn" onclick="showTab('akd')" id="tabAkd">💰</button>
+                </div>
+                
+                <div id="ozetDetay" style="display:none"></div>
+                <div id="virmanDetay" style="display:none"></div>
+                <div id="eslemeDetay" style="display:none"></div>
+                <div id="toplamaDetay" style="display:none"></div>
+                <div id="takasDetay" style="display:none"></div>
+                <div id="akdDetay" style="display:none"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase yüklenme kontrolü
+        if (typeof firebase === 'undefined') {
+            alert('⚠️ Firebase yüklenemedi! İnternet bağlantınızı kontrol edin.');
+            throw new Error('Firebase could not be loaded');
+        }
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1DHpkhs-sRLL_K3yM0IUm7fFnVGdSXpA",
+            authDomain: "eraytakastik.firebaseapp.com",
+            projectId: "eraytakastik",
+            storageBucket: "eraytakastik.firebasestorage.app",
+            messagingSenderId: "357690428225",
+            appId: "1:357690428225:web:c2e4e410bdce26c0e22fc0"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        const today = new Date();
+        const monthAgo = new Date(today);
+        monthAgo.setDate(today.getDate() - 30);
+        
+        document.getElementById('bitisTarih').valueAsDate = today;
+        document.getElementById('baslangicTarih').valueAsDate = monthAgo;
+        
+        function getCihazID() {
+            let cihazID = localStorage.getItem('cihaz_id');
+            if (!cihazID) {
+                cihazID = 'WEB_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                localStorage.setItem('cihaz_id', cihazID);
+            }
+            return cihazID;
+        }
+        
+        function googleLogin() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(error => alert('Giriş hatası: ' + error.message));
+        }
+        
+        function logout() {
+            auth.signOut().then(() => {
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('appSection').classList.add('hidden');
+            });
+        }
+        
+        auth.onAuthStateChanged(user => {
+            if (user) checkUserAuthorization(user);
+            else {
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('appSection').classList.add('hidden');
+            }
+        });
+        
+        async function checkUserAuthorization(user) {
+            try {
+                const userDoc = await db.collection('kullanicilar').doc(user.email).get();
+                if (!userDoc.exists || !userDoc.data().aktif) {
+                    alert('❌ Erişim yetkiniz yok!');
+                    auth.signOut(); return;
+                }
+                const cihazID = getCihazID();
+                const kayitliCihaz = userDoc.data().cihaz_id;
+                if (kayitliCihaz && kayitliCihaz !== cihazID) {
+                    alert('❌ Bu hesap başka bir cihazda kullanılıyor.');
+                    auth.signOut(); return;
+                }
+                await db.collection('kullanicilar').doc(user.email).update({
+                    cihaz_id: cihazID,
+                    son_giris: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showApp(user);
+            } catch (error) {
+                alert('Hata: ' + error.message);
+                auth.signOut();
+            }
+        }
+        
+        function showApp(user) {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('appSection').classList.remove('hidden');
+            document.getElementById('userEmail').textContent = user.email;
+            loadGunlukTarama();
+            loadHaftalikTarama();
+        }
+        
+        async function loadGunlukTarama() {
+            try {
+                const snapshot = await db.collection('taramalar').doc('gunluk').collection('liste')
+                    .orderBy('tarih', 'desc').limit(5).get();
+                const container = document.getElementById('gunlukTarama');
+                if (snapshot.empty) {
+                    container.innerHTML = '<p style="text-align:center;color:#999;font-size:10px;padding:10px;">Yok</p>';
+                    return;
+                }
+                let html = '';
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    html += `<div class="tarama-card">
+                        <div class="tarama-hisse">${d.hisse}</div>
+                        <div class="tarama-detail">${d.destek}₺ - ${d.direnc}₺</div>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                document.getElementById('gunlukTarama').innerHTML = '<div class="error">Hata</div>';
+            }
+        }
+        
+        async function loadHaftalikTarama() {
+            try {
+                const snapshot = await db.collection('taramalar').doc('haftalik').collection('liste')
+                    .orderBy('tarih', 'desc').limit(5).get();
+                const container = document.getElementById('haftalikTarama');
+                if (snapshot.empty) {
+                    container.innerHTML = '<p style="text-align:center;color:#999;font-size:10px;padding:10px;">Yok</p>';
+                    return;
+                }
+                let html = '';
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    html += `<div class="tarama-card">
+                        <div class="tarama-hisse">${d.hisse}</div>
+                        <div class="tarama-detail">${d.aciklama}</div>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                document.getElementById('haftalikTarama').innerHTML = '<div class="error">Hata</div>';
+            }
+        }
+        
+        let aktifTab = 'ozet';
+        
+        function showTab(tab) {
+            aktifTab = tab;
+            ['ozet','virman','esleme','toplama','takas','akd'].forEach(t => {
+                const btn = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+                if (btn) btn.classList.toggle('active', t === tab);
+                document.getElementById(t + 'Detay').style.display = t === tab ? 'block' : 'none';
+            });
+        }
+        
+        async function hisseAnaliz() {
+            const hisse = document.getElementById('hisseInput').value.trim().toUpperCase();
+            if (!hisse) { alert('Hisse kodu girin!'); return; }
+            
+            const baslangic = document.getElementById('baslangicTarih').value;
+            const bitis = document.getElementById('bitisTarih').value;
+            
+            document.getElementById('analizOzet').innerHTML = '';
+            ['ozet','virman','esleme','toplama','takas','akd'].forEach(t => {
+                document.getElementById(t + 'Detay').innerHTML = '<div class="loading">Analiz ediliyor...</div>';
+            });
+            document.getElementById('analizTabs').style.display = 'flex';
+            showTab('ozet');
+            
+            // VERİ ÇEK
+            let queryTakas = db.collection('takas_veriler').where('hisse', '==', hisse);
+            if (baslangic) queryTakas = queryTakas.where('tarih', '>=', baslangic);
+            if (bitis) queryTakas = queryTakas.where('tarih', '<=', bitis);
+            const takasData = await queryTakas.get();
+            
+            let queryAkd = db.collection('akd_veriler').where('hisse', '==', hisse);
+            if (baslangic) queryAkd = queryAkd.where('tarih', '>=', baslangic);
+            if (bitis) queryAkd = queryAkd.where('tarih', '<=', bitis);
+            const akdData = await queryAkd.get();
+            
+            // === ANALİZLER ===
+            
+            // AKD Tarih-Kurum Yapısı
+            const akdTarihKurum = {}; // {tarih: {kurum: {alis, satis, lot}}}
+            akdData.forEach(doc => {
+                const d = doc.data();
+                const tarih = d.tarih || '';
+                const kurum = d.kurum || 'Bilinmeyen';
+                const lot = d.net_lot || 0;
+                
+                if (!akdTarihKurum[tarih]) akdTarihKurum[tarih] = {};
+                if (!akdTarihKurum[tarih][kurum]) akdTarihKurum[tarih][kurum] = {alis: 0, satis: 0};
+                
+                if (lot > 0) akdTarihKurum[tarih][kurum].alis += lot;
+                else if (lot < 0) akdTarihKurum[tarih][kurum].satis += Math.abs(lot);
+            });
+            
+            // TAKAS Tarih-Kurum Yapısı
+            const takasTarihKurum = {}; // {tarih: {kurum: lot}}
+            takasData.forEach(doc => {
+                const d = doc.data();
+                const tarih = d.tarih || '';
+                const kurum = d.kurum || 'Bilinmeyen';
+                const lot = d.net_lot || 0;
+                
+                if (!takasTarihKurum[tarih]) takasTarihKurum[tarih] = {};
+                if (!takasTarihKurum[tarih][kurum]) takasTarihKurum[tarih][kurum] = 0;
+                takasTarihKurum[tarih][kurum] += lot;
+            });
+            
+            // === 1. GELİŞMİŞ VİRMAN TESPİTİ ===
+            const virmanlar = [];
+            
+            for (let [tarih, kurumlar] of Object.entries(akdTarihKurum)) {
+                for (let [kurum, islem] of Object.entries(kurumlar)) {
+                    if (islem.alis > 0 && islem.satis > 0) {
+                        // AKD'de hem alış hem satış var
+                        
+                        // T+2 hesapla
+                        const akdTarihObj = new Date(tarih);
+                        const t2Tarih = new Date(akdTarihObj);
+                        t2Tarih.setDate(t2Tarih.getDate() + 2);
+                        const t2Str = t2Tarih.toISOString().split('T')[0];
+                        
+                        // TAKAS'ta T+2'de bu kurum var mı?
+                        const takasT2Kurum = takasTarihKurum[t2Str];
+                        const takasT2Var = takasT2Kurum && takasT2Kurum[kurum];
+                        
+                        if (!takasT2Var) {
+                            // TAKAS'ta yok, ama başka kurumlarda yüksek işlem var mı?
+                            let digerKurumlar = [];
+                            if (takasT2Kurum) {
+                                for (let [k, lot] of Object.entries(takasT2Kurum)) {
+                                    if (k !== kurum && Math.abs(lot) > islem.alis * 0.5) {
+                                        digerKurumlar.push(k);
+                                    }
+                                }
+                            }
+                            
+                            virmanlar.push({
+                                tarih: tarih,
+                                kurum: kurum,
+                                akd_alis: islem.alis,
+                                akd_satis: islem.satis,
+                                t2_tarih: t2Str,
+                                takas_yok: !takasT2Var,
+                                diger_kurumlar: digerKurumlar
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // === 2. LOT EŞLEŞMESİ (%3 tolerans) ===
+            const lotEslesmeleri = [];
+            
+            akdData.forEach(akdDoc => {
+                const akd = akdDoc.data();
+                if (akd.net_lot <= 0) return; // Sadece AKD alışları
+                
+                const akdTarih = new Date(akd.tarih);
+                const t2Tarih = new Date(akdTarih);
+                t2Tarih.setDate(t2Tarih.getDate() + 2);
+                const t2Str = t2Tarih.toISOString().split('T')[0];
+                
+                // TAKAS T+2'de başka kurumlarda benzer LOT var mı?
+                takasData.forEach(takasDoc => {
+                    const takas = takasDoc.data();
+                    if (takas.tarih === t2Str && takas.kurum !== akd.kurum) {
+                        const akdLot = Math.abs(akd.net_lot);
+                        const takasLot = Math.abs(takas.net_lot);
+                        const fark = Math.abs(akdLot - takasLot);
+                        const tolerans = akdLot * 0.03; // %3
+                        
+                        if (fark <= tolerans) {
+                            lotEslesmeleri.push({
+                                akd_kurum: akd.kurum,
+                                akd_tarih: akd.tarih,
+                                akd_lot: akdLot,
+                                takas_kurum: takas.kurum,
+                                takas_tarih: takas.tarih,
+                                takas_lot: takasLot,
+                                fark: fark
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // === 3. DÜZENLİ TOPLAMA TESPİTİ ===
+            const kurumGunlukAlim = {}; // {kurum: {tarih: lot}}
+            
+            akdData.forEach(doc => {
+                const d = doc.data();
+                if (d.net_lot <= 0) return; // Sadece alışlar
+                
+                const kurum = d.kurum || 'Bilinmeyen';
+                const tarih = d.tarih || '';
+                
+                if (!kurumGunlukAlim[kurum]) kurumGunlukAlim[kurum] = {};
+                if (!kurumGunlukAlim[kurum][tarih]) kurumGunlukAlim[kurum][tarih] = 0;
+                kurumGunlukAlim[kurum][tarih] += d.net_lot;
+            });
+            
+            const duzenliToplayanlar = [];
+            
+            for (let [kurum, tarihler] of Object.entries(kurumGunlukAlim)) {
+                const tarihList = Object.keys(tarihler).sort();
+                
+                if (tarihList.length >= 3) {
+                    // En az 3 gün alım var
+                    let duzenli = true;
+                    let bosGun = 0;
+                    
+                    for (let i = 0; i < tarihList.length - 1; i++) {
+                        const t1 = new Date(tarihList[i]);
+                        const t2 = new Date(tarihList[i + 1]);
+                        const gunFark = Math.floor((t2 - t1) / (1000 * 60 * 60 * 24));
+                        
+                        if (gunFark > 2) {
+                            duzenli = false;
+                            break;
+                        }
+                        if (gunFark === 2) bosGun++;
+                    }
+                    
+                    if (duzenli && tarihList.length >= 3) {
+                        const toplamLot = Object.values(tarihler).reduce((a, b) => a + b, 0);
+                        duzenliToplayanlar.push({
+                            kurum: kurum,
+                            gun_sayisi: tarihList.length,
+                            toplam_lot: toplamLot,
+                            detay: tarihList.map(t => `${t}: ${tarihler[t].toLocaleString()} LOT`)
+                        });
+                    }
+                }
+            }
+            
+            // === TAKAS/AKD TOPLAMLAR ===
+            const takasKurumlar = {};
+            takasData.forEach(doc => {
+                const d = doc.data();
+                const kurum = d.kurum || 'Bilinmeyen';
+                if (!takasKurumlar[kurum]) takasKurumlar[kurum] = 0;
+                takasKurumlar[kurum] += (d.net_lot || 0);
+            });
+            
+            const akdKurumlar = {};
+            akdData.forEach(doc => {
+                const d = doc.data();
+                const kurum = d.kurum || 'Bilinmeyen';
+                if (!akdKurumlar[kurum]) akdKurumlar[kurum] = 0;
+                akdKurumlar[kurum] += (d.net_lot || 0);
+            });
+            
+            // === ÖZET SEKME ===
+            let ozetHtml = `<div class="ozet-grid">
+                <div class="ozet-item">
+                    <div class="ozet-label">Virman</div>
+                    <div class="ozet-value">${virmanlar.length}</div>
+                </div>
+                <div class="ozet-item">
+                    <div class="ozet-label">LOT Eşleşme</div>
+                    <div class="ozet-value">${lotEslesmeleri.length}</div>
+                </div>
+                <div class="ozet-item">
+                    <div class="ozet-label">Düzenli Toplama</div>
+                    <div class="ozet-value">${duzenliToplayanlar.length}</div>
+                </div>
+                <div class="ozet-item">
+                    <div class="ozet-label">TAKAS</div>
+                    <div class="ozet-value">${takasData.size}</div>
+                </div>
+            </div>`;
+            
+            if (virmanlar.length > 0) {
+                ozetHtml += '<div class="kritik-card"><div class="kritik-baslik">⚠️ ' + virmanlar.length + ' Virman Tespit Edildi</div></div>';
+            }
+            if (lotEslesmeleri.length > 0) {
+                ozetHtml += '<div class="uyari-card"><div class="uyari-baslik">🔗 ' + lotEslesmeleri.length + ' LOT Eşleşmesi</div></div>';
+            }
+            if (duzenliToplayanlar.length > 0) {
+                ozetHtml += '<div class="basari-card"><div class="basari-baslik">📈 ' + duzenliToplayanlar.length + ' Kurum Topluyor</div></div>';
+            }
+            
+            document.getElementById('ozetDetay').innerHTML = ozetHtml;
+            
+            // === VİRMAN SEKME ===
+            if (virmanlar.length > 0) {
+                let html = '';
+                virmanlar.forEach(v => {
+                    html += `<div class="virman-card">
+                        <div class="virman-baslik">${v.kurum} - ${v.tarih}</div>
+                        <div style="font-size:10px;color:#666;">AKD Alış: ${v.akd_alis.toLocaleString()} | Satış: ${v.akd_satis.toLocaleString()}</div>
+                        <div style="font-size:10px;color:#c62828;">T+2 (${v.t2_tarih}) TAKAS'ta YOK</div>`;
+                    
+                    if (v.diger_kurumlar.length > 0) {
+                        html += `<div style="font-size:10px;color:#1976d2;margin-top:2px;">
+                            ✅ Kurum arası virman olabilir: ${v.diger_kurumlar.join(', ')}
+                        </div>`;
+                    }
+                    
+                    html += '</div>';
+                });
+                document.getElementById('virmanDetay').innerHTML = html;
+            } else {
+                document.getElementById('virmanDetay').innerHTML = '<p style="text-align:center;color:#999;padding:12px;font-size:10px;">Virman tespit edilmedi</p>';
+            }
+            
+            // === LOT EŞLEŞMESİ SEKME ===
+            if (lotEslesmeleri.length > 0) {
+                let html = '';
+                lotEslesmeleri.forEach(e => {
+                    html += `<div class="uyari-card">
+                        <div class="uyari-baslik">${e.akd_kurum} malı ${e.takas_kurum}'de topluyor</div>
+                        <div style="font-size:9px;color:#666;margin-top:2px;">
+                            AKD ${e.akd_kurum}: ${e.akd_tarih} → ${e.akd_lot.toLocaleString()} LOT alış
+                        </div>
+                        <div style="font-size:9px;color:#666;">
+                            TAKAS ${e.takas_kurum}: ${e.takas_tarih} (T+2) → ${e.takas_lot.toLocaleString()} LOT
+                        </div>
+                        <div style="font-size:9px;color:#ef6c00;margin-top:2px;">
+                            ⚠️ AKD Uyumsuzluk (Fark: ${e.fark.toLocaleString()} LOT - %${((e.fark/e.akd_lot)*100).toFixed(1)})
+                        </div>
+                    </div>`;
+                });
+                document.getElementById('eslemeDetay').innerHTML = html;
+            } else {
+                document.getElementById('eslemeDetay').innerHTML = '<p style="text-align:center;color:#999;padding:12px;font-size:10px;">LOT eşleşmesi yok</p>';
+            }
+            
+            // === DÜZENLİ TOPLAMA SEKME ===
+            if (duzenliToplayanlar.length > 0) {
+                let html = '';
+                duzenliToplayanlar.forEach(d => {
+                    html += `<div class="toplama-card">
+                        <div class="toplama-baslik">${d.kurum} ${hisse} topluyor</div>
+                        <div style="font-size:10px;color:#666;margin-top:2px;">
+                            ${d.gun_sayisi} gün boyunca toplam ${d.toplam_lot.toLocaleString()} LOT alış
+                        </div>`;
+                    
+                    d.detay.slice(0, 5).forEach(dt => {
+                        html += `<div style="font-size:9px;color:#555;margin-top:1px;">• ${dt}</div>`;
+                    });
+                    
+                    if (d.detay.length > 5) {
+                        html += `<div style="font-size:9px;color:#999;margin-top:1px;">... ve ${d.detay.length - 5} gün daha</div>`;
+                    }
+                    
+                    html += '</div>';
+                });
+                document.getElementById('toplamaDetay').innerHTML = html;
+            } else {
+                document.getElementById('toplamaDetay').innerHTML = '<p style="text-align:center;color:#999;padding:12px;font-size:10px;">Düzenli toplama tespit edilmedi</p>';
+            }
+            
+            // === TAKAS SEKME ===
+            if (Object.keys(takasKurumlar).length > 0) {
+                const sorted = Object.entries(takasKurumlar).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+                let html = '';
+                sorted.forEach(([kurum, lot]) => {
+                    const cls = lot >= 0 ? 'pozitif' : 'negatif';
+                    const sign = lot >= 0 ? '+' : '';
+                    html += `<div class="analiz-card" style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:10px;font-weight:bold;">${kurum}</span>
+                        <span class="kurum-lot ${cls}">${sign}${lot.toLocaleString()}</span>
+                    </div>`;
+                });
+                document.getElementById('takasDetay').innerHTML = html;
+            } else {
+                document.getElementById('takasDetay').innerHTML = '<p style="text-align:center;color:#999;padding:12px;font-size:10px;">TAKAS verisi yok</p>';
+            }
+            
+            // === AKD SEKME ===
+            if (Object.keys(akdKurumlar).length > 0) {
+                const sorted = Object.entries(akdKurumlar).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+                let html = '';
+                sorted.forEach(([kurum, lot]) => {
+                    const cls = lot >= 0 ? 'pozitif' : 'negatif';
+                    const sign = lot >= 0 ? '+' : '';
+                    html += `<div class="analiz-card" style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:10px;font-weight:bold;">${kurum}</span>
+                        <span class="kurum-lot ${cls}">${sign}${lot.toLocaleString()}</span>
+                    </div>`;
+                });
+                document.getElementById('akdDetay').innerHTML = html;
+            } else {
+                document.getElementById('akdDetay').innerHTML = '<p style="text-align:center;color:#999;padding:12px;font-size:10px;">AKD verisi yok</p>';
+            }
+        }
+    </script>
+</body>
+</html>
